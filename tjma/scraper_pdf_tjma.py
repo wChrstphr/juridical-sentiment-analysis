@@ -1,6 +1,6 @@
 """
-Scraper para baixar PDFs das decisões dos processos do TJDF via PJE
-Utiliza Playwright para navegar no portal de consulta pública do PJE-TJDF
+Scraper para baixar PDFs das decisões dos processos do TJMA via PJE
+Utiliza Playwright para navegar no portal de consulta pública do PJE-TJMA
 """
 
 import csv
@@ -55,9 +55,14 @@ def formatar_numero_cnj(numero: str) -> str:
     return f"{n[0:7]}-{n[7:9]}.{n[9:13]}.{n[13]}.{n[14:16]}.{n[16:20]}"
 
 
-async def baixar_pdf_processo(page, numero_processo: str, max_retries: int = 3) -> bool:
+async def baixar_pdf_processo(
+    page,
+    numero_processo: str,
+    cache_existentes: set,
+    max_retries: int = 3,
+) -> bool:
     """
-    Baixa o PDF da decisão do processo via PJE-TJDF.
+    Baixa o PDF da decisão do processo via PJE-TJMA.
 
     Fluxo de navegação:
         1. Busca o processo no portal público
@@ -71,7 +76,7 @@ async def baixar_pdf_processo(page, numero_processo: str, max_retries: int = 3) 
     numero_cnj = formatar_numero_cnj(numero_processo)
     filename = os.path.join(OUTPUT_DIR, f"{numero_processo}.pdf")
 
-    if os.path.exists(filename):
+    if numero_processo in cache_existentes:
         print("   PDF já existe, pulando...")
         return True
 
@@ -131,21 +136,20 @@ async def baixar_pdf_processo(page, numero_processo: str, max_retries: int = 3) 
 
             def _xpath_link(termo: str) -> str:
                 """
-                XPath que encontra <a> cujo texto descendente contenha `termo`
-                (case-insensitive) E que NÃO comece por "visualizar"
-                (filtrando os links-container "Visualizar documentos...").
+                XPath que encontra <a> cujo texto descendente CONTENHA `termo`
+                (case-insensitive). Os termos são suficientemente específicos
+                (ex: "sentença (sentença)") para não capturar falsos positivos
+                como "DECISÃO AI ... (CÓPIA DE DECISÃO)".
+                O texto real dos links inclui prefixo de data:
+                  "18/06/2025 21:20:26 - SENTENÇA (SENTENÇA)"
+                por isso é necessário contains() e não igualdade exata.
                 """
                 return (
                     f"xpath=.//a["
                     f"contains("
                     f"translate(normalize-space(string(.)),'{_UPPER}','{_LOWER}'),"
-                    f"'{termo}'"
-                    f") and not("
-                    f"starts-with("
-                    f"translate(normalize-space(string(.)),'{_UPPER}','{_LOWER}'),"
-                    f"'visualizar'"
-                    f"))"
-                    f"]"
+                    f"'{termo.lower()}'"
+                    f")]"
                 )
 
             # Prioridade: Sentença (decisão final) > Julgamento > Decisão (interlocutória)
@@ -200,6 +204,7 @@ async def baixar_pdf_processo(page, numero_processo: str, max_retries: int = 3) 
             )
             with open(filename, "wb") as f:
                 f.write(pdf_bytes)
+            cache_existentes.add(numero_processo)
             print(f"   PDF gerado ({len(pdf_bytes):,} bytes)")
             return True
 
@@ -230,7 +235,7 @@ async def baixar_pdf_processo(page, numero_processo: str, max_retries: int = 3) 
 async def executar_scraping():
     """Executa o download dos PDFs para todos os processos do CSV."""
     print("=" * 60)
-    print("SCRAPER TJDF (PJE) - Download de PDFs das Decisões")
+    print("SCRAPER TJMA (PJE) - Download de PDFs das Decisões")
     print("=" * 60)
 
     print("\n1. Lendo números dos processos...")
@@ -239,6 +244,13 @@ async def executar_scraping():
 
     print("\n2. Iniciando download dos PDFs...")
 
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    cache_existentes = {
+        f[:-4] for f in os.listdir(OUTPUT_DIR) if f.endswith(".pdf")
+    }
+    print(f"   PDFs já baixados (cache): {len(cache_existentes)}")
+    print(f"   Restantes               : {len(numeros_processos) - sum(1 for n in numeros_processos if n in cache_existentes)}")
+
     async with async_playwright() as playwright:
         sucessos = 0
         falhas = 0
@@ -246,7 +258,7 @@ async def executar_scraping():
 
         async def criar_browser():
             browser = await playwright.chromium.launch(
-                headless=True,
+                headless=False,
                 args=["--disable-blink-features=AutomationControlled", "--no-sandbox"],
             )
             ctx = await browser.new_context(
@@ -290,7 +302,7 @@ async def executar_scraping():
                 print(f"\n[{idx}/{len(numeros_processos)}] {numero_cnj}")
 
                 try:
-                    sucesso = await baixar_pdf_processo(page, numero)
+                    sucesso = await baixar_pdf_processo(page, numero, cache_existentes)
 
                     if sucesso:
                         sucessos += 1
