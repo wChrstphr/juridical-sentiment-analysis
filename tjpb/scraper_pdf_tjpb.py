@@ -177,22 +177,70 @@ def baixar_pdf_processo(driver, numero_processo, primeiro_acesso=False):
         
         # Procurar link do documento (Sentença ou Decisão)
         print(f"   Procurando link do documento...")
+        
+        # Verificar se há documentos disponíveis
+        try:
+            sem_resultados = driver.find_elements(By.XPATH, "//*[contains(text(), '0 resultados') or contains(text(), 'Nenhum registro')]")
+            if sem_resultados:
+                for elem in sem_resultados:
+                    if elem.is_displayed():
+                        print("   ✗ Processo sem documentos disponíveis (0 resultados)")
+                        driver.close()
+                        driver.switch_to.window(janelas_antes[0])
+                        return False
+        except Exception:
+            pass
+        
         link_documento = None
         
-        # Tentativa 1: Buscar por "Sentença"
+        # Tentativa 1: Buscar por "VISUALIZAR" (padrão TJPB)
         try:
-            link_documento = driver.find_element(By.XPATH, "//a[contains(@class, 'btn') and contains(text(), 'Sentença')]")
+            link_documento = driver.find_element(By.XPATH, "//a[contains(@class, 'btn') and contains(., 'VISUALIZAR')]")
         except NoSuchElementException:
             pass
         
-        # Tentativa 2: Buscar por "Decisão" se não encontrou Sentença
+        # Tentativa 2: Buscar por "Sentença"
         if not link_documento:
             try:
-                link_documento = driver.find_element(By.XPATH, "//a[contains(@class, 'btn') and contains(text(), 'Decisão')]")
+                link_documento = driver.find_element(By.XPATH, "//a[contains(@class, 'btn') and contains(., 'Sentença')]")
             except NoSuchElementException:
                 pass
         
-        # Tentativa 3: Buscar por btn-sm com qualquer texto de documento
+        # Tentativa 3: Buscar por "Decisão"
+        if not link_documento:
+            try:
+                link_documento = driver.find_element(By.XPATH, "//a[contains(@class, 'btn') and contains(., 'Decisão')]")
+            except NoSuchElementException:
+                pass
+        
+        # Tentativa 4: Buscar por "SENTENÇA" (maiúscula)
+        if not link_documento:
+            try:
+                link_documento = driver.find_element(By.XPATH, "//a[contains(@class, 'btn') and contains(., 'SENTENÇA')]")
+            except NoSuchElementException:
+                pass
+        
+        # Tentativa 5: Buscar por "DECISÃO" (maiúscula)
+        if not link_documento:
+            try:
+                link_documento = driver.find_element(By.XPATH, "//a[contains(@class, 'btn') and contains(., 'DECISÃO')]")
+            except NoSuchElementException:
+                pass
+        
+        # Tentativa 6: Qualquer link com btn-sm que contenha data (padrão: "28/11/2025")
+        if not link_documento:
+            try:
+                links_botoes = driver.find_elements(By.CSS_SELECTOR, "a.btn.btn-sm")
+                for link in links_botoes:
+                    texto = link.text
+                    # Verificar se contém data no formato dd/mm/yyyy
+                    if "/" in texto and any(char.isdigit() for char in texto):
+                        link_documento = link
+                        break
+            except:
+                pass
+        
+        # Tentativa 7: Primeiro link com classe btn-sm
         if not link_documento:
             try:
                 link_documento = driver.find_element(By.CSS_SELECTOR, "a.btn.btn-sm")
@@ -201,6 +249,13 @@ def baixar_pdf_processo(driver, numero_processo, primeiro_acesso=False):
         
         if not link_documento:
             print("   ✗ Link de documento não encontrado")
+            print(f"   DEBUG: HTML da página salvo para análise")
+            # Salvar HTML para debug
+            try:
+                with open(f"tjpb/debug_{numero_processo}.html", "w", encoding="utf-8") as f:
+                    f.write(driver.page_source)
+            except:
+                pass
             driver.close()
             driver.switch_to.window(janelas_antes[0])
             return False
