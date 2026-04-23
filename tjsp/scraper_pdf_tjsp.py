@@ -72,9 +72,11 @@ async def baixar_pdf_processo(page, numero_processo, browser):
         # Busca por diversos tipos de decisões (evitar "Transitado em Julgado")
         link = None
         termos_busca = [
-            "contains(normalize-space(text()), 'Julgado')",  # Julgado procedente/improcedente
-            "contains(normalize-space(text()), 'Decisão')",  # Decisão Interlocutória, etc
-            "contains(normalize-space(text()), 'Sentença')", # Sentença
+            "contains(normalize-space(text()), 'Julgad')",   # Julgado/Julgada
+            "contains(normalize-space(text()), 'Decis')",    # Decisão/Decisao
+            "contains(normalize-space(text()), 'Senten')",   # Sentença/Sentenca
+            "contains(normalize-space(text()), 'Procedente')",
+            "contains(normalize-space(text()), 'Improcedente')",
         ]
         
         for termo in termos_busca:
@@ -157,7 +159,7 @@ async def executar_scraping():
     print("\n2. Iniciando download dos PDFs...")
     
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(headless=True)  # Mudar para True para rodar sem interface gráfica
+        browser = await playwright.chromium.launch(headless=False)  # Mudar para True para rodar sem interface gráfica
         context = await browser.new_context()
         page = await context.new_page()
         
