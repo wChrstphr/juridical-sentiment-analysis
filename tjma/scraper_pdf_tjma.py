@@ -341,13 +341,11 @@ async def executar_scraping():
     # Resumo final
     total = len(numeros_processos)
     print("\n" + "=" * 60)
-    print("ESTATÍSTICAS FINAIS")
+    print("RELATÓRIO FINAL")
     print("=" * 60)
-    print(f"Total de processos : {total}")
-    print(
-        f"Sucessos           : {sucessos} ({sucessos * 100 // total if total else 0}%)"
-    )
-    print(f"Falhas             : {falhas} ({falhas * 100 // total if total else 0}%)")
+    print(f"Total de processos: {total}")
+    print(f"Sucessos: {sucessos} ({sucessos * 100 // total if total else 0}%)")
+    print(f"Falhas: {falhas} ({falhas * 100 // total if total else 0}%)")
     print("=" * 60)
 
 

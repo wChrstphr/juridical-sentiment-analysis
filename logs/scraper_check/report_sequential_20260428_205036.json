@@ -1,0 +1,143 @@
+{
+  "generated_at": "2026-04-28T20:50:36",
+  "total_tribunals": 17,
+  "total_duration_sec": 24097.034413814545,
+  "status_count": {
+    "success": 4,
+    "timeout": 8,
+    "script_not_found": 3,
+    "error": 2
+  },
+  "results": [
+    {
+      "tribunal": "tjac",
+      "status": "success",
+      "script": "tjac/scraper_pdf_tjac.py",
+      "return_code": 0,
+      "duration_sec": 389.67444920539856,
+      "attempts": 1
+    },
+    {
+      "tribunal": "tjal",
+      "status": "timeout",
+      "script": "tjal/scraper_pdf_tjal.py",
+      "return_code": -9,
+      "duration_sec": 900.0034584999084,
+      "attempts": 3
+    },
+    {
+      "tribunal": "tjam",
+      "status": "success",
+      "script": "tjam/scraper_pdf_tjam.py",
+      "return_code": 0,
+      "duration_sec": 482.2577393054962,
+      "attempts": 1
+    },
+    {
+      "tribunal": "tjba",
+      "status": "script_not_found",
+      "script": "tjba/scraper_pdf_tjba.py",
+      "attempts": 0
+    },
+    {
+      "tribunal": "tjce",
+      "status": "error",
+      "script": "tjce/scraper_pdf_tjce.py",
+      "return_code": 1,
+      "duration_sec": 0.16466474533081055,
+      "attempts": 3
+    },
+    {
+      "tribunal": "tjdf",
+      "status": "timeout",
+      "script": "tjdf/scraper_pdf_tjdf.py",
+      "return_code": -9,
+      "duration_sec": 900.003392457962,
+      "attempts": 3
+    },
+    {
+      "tribunal": "tjes",
+      "status": "script_not_found",
+      "script": "tjes/scraper_pdf_tjes.py",
+      "attempts": 0
+    },
+    {
+      "tribunal": "tjgo",
+      "status": "script_not_found",
+      "script": "tjgo/scraper_pdf_tjgo.py",
+      "attempts": 0
+    },
+    {
+      "tribunal": "tjma",
+      "status": "success",
+      "script": "tjma/scraper_pdf_tjma.py",
+      "return_code": 0,
+      "duration_sec": 16.222491025924683,
+      "attempts": 3
+    },
+    {
+      "tribunal": "tjms",
+      "status": "timeout",
+      "script": "tjms/scraper_pdf_tjms.py",
+      "return_code": -9,
+      "duration_sec": 900.0052559375763,
+      "attempts": 3
+    },
+    {
+      "tribunal": "tjpb",
+      "status": "timeout",
+      "script": "tjpb/scraper_pdf_tjpb.py",
+      "return_code": -9,
+      "duration_sec": 900.0034086704254,
+      "attempts": 3
+    },
+    {
+      "tribunal": "tjpe",
+      "status": "timeout",
+      "script": "tjpe/scraper_pdf_tjpe.py",
+      "return_code": -9,
+      "duration_sec": 900.0026876926422,
+      "attempts": 3
+    },
+    {
+      "tribunal": "tjrj",
+      "status": "timeout",
+      "script": "tjrj/scraper_pdf_tjrj.py",
+      "return_code": -9,
+      "duration_sec": 900.0033206939697,
+      "attempts": 3
+    },
+    {
+      "tribunal": "tjrs",
+      "status": "timeout",
+      "script": "tjrs/scraper_pdf_tjrs.py",
+      "return_code": -9,
+      "duration_sec": 900.0041511058807,
+      "attempts": 3
+    },
+    {
+      "tribunal": "tjsc",
+      "status": "success",
+      "script": "tjsc/scraper_pdf_tjsc.py",
+      "return_code": 0,
+      "duration_sec": 425.68763637542725,
+      "attempts": 1
+    },
+    {
+      "tribunal": "tjsp",
+      "status": "timeout",
+      "script": "tjsp/scraper_pdf_tjsp.py",
+      "return_code": -9,
+      "duration_sec": 900.0055727958679,
+      "attempts": 3
+    },
+    {
+      "tribunal": "tjto",
+      "status": "error",
+      "script": "tjto/scraper_pdf_tjto.py",
+      "return_code": 1,
+      "duration_sec": 0.1645050048828125,
+      "attempts": 3
+    }
+  ]
+}

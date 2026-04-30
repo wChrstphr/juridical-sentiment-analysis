@@ -94,9 +94,11 @@ async def baixar_pdf_processo(page, numero_processo, browser, max_retries=3):
         # Busca por diversos tipos de decisões (evitar "Transitado em Julgado")
         link = None
         termos_busca = [
-            "contains(normalize-space(text()), 'Julgado')",  # Julgado procedente/improcedente
-            "contains(normalize-space(text()), 'Decisão')",  # Decisão Interlocutória, etc
-            "contains(normalize-space(text()), 'Sentença')"  # Sentença
+            "contains(normalize-space(text()), 'Julgad')",   # Julgado/Julgada
+            "contains(normalize-space(text()), 'Decis')",    # Decisão/Decisao
+            "contains(normalize-space(text()), 'Senten')",   # Sentença/Sentenca
+            "contains(normalize-space(text()), 'Procedente')",
+            "contains(normalize-space(text()), 'Improcedente')",
         ]
         
         for termo in termos_busca:
@@ -270,12 +272,13 @@ async def executar_scraping():
                 pass
     
     # Estatísticas
+    total = len(numeros_processos)
     print("\n" + "=" * 60)
-    print("ESTATÍSTICAS")
+    print("RELATÓRIO FINAL")
     print("=" * 60)
-    print(f"Total de processos: {len(numeros_processos)}")
-    print(f"Sucessos: {sucessos} ({sucessos*100//len(numeros_processos)}%)")
-    print(f"Falhas: {falhas} ({falhas*100//len(numeros_processos)}%)")
+    print(f"Total de processos: {total}")
+    print(f"Sucessos: {sucessos} ({sucessos*100//total if total > 0 else 0}%)")
+    print(f"Falhas: {falhas} ({falhas*100//total if total > 0 else 0}%)")
     print("=" * 60)
 
 

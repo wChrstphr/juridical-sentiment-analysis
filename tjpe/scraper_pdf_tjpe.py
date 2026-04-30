@@ -9,6 +9,22 @@ import os
 from playwright.async_api import async_playwright
 
 
+NON_INTERACTIVE = os.getenv("SCRAPER_NON_INTERACTIVE", "0") == "1"
+
+
+def aguardar_confirmacao_captcha(mensagem):
+    """Aguarda resolução manual do CAPTCHA; em modo não interativo apenas sinaliza."""
+    if NON_INTERACTIVE:
+        print("CAPTCHA_REQUIRED: execução não interativa detectou desafio de verificação humana")
+        return False
+    try:
+        input(mensagem)
+        return True
+    except EOFError:
+        print("CAPTCHA_REQUIRED: entrada padrão indisponível para resolução manual")
+        return False
+
+
 def ler_numeros_processos(arquivo_csv="tjpe/data/notebook1/numeros_processos.csv"):
     """Lê os números dos processos do arquivo CSV"""
     numeros = []
@@ -49,7 +65,8 @@ async def baixar_pdf_processo(page, numero_processo, browser):
                 print("Por favor, resolva o CAPTCHA manualmente no navegador.")
                 print("Após resolver, pressione ENTER aqui para continuar...")
                 print("!"*60 + "\n")
-                input()
+                if not aguardar_confirmacao_captcha(""):
+                    return False
                 print("   ✓ Continuando...")
                 await asyncio.sleep(2)
             
@@ -62,7 +79,8 @@ async def baixar_pdf_processo(page, numero_processo, browser):
                 print("Por favor, resolva o CAPTCHA manualmente no navegador.")
                 print("Após resolver, pressione ENTER aqui para continuar...")
                 print("!"*60 + "\n")
-                input()
+                if not aguardar_confirmacao_captcha(""):
+                    return False
                 print("   ✓ Continuando...")
                 await asyncio.sleep(2)
         except Exception:
@@ -83,7 +101,8 @@ async def baixar_pdf_processo(page, numero_processo, browser):
             print("Verifique se há CAPTCHA no navegador.")
             print("Após resolver (se houver), pressione ENTER para continuar...")
             print("!"*60 + "\n")
-            input()
+            if not aguardar_confirmacao_captcha(""):
+                return False
             print("   ✓ Tentando continuar...")
             await asyncio.sleep(2)
             await campo_processo.wait_for(state="visible", timeout=30000)
@@ -113,7 +132,8 @@ async def baixar_pdf_processo(page, numero_processo, browser):
                 print("Por favor, resolva o CAPTCHA manualmente no navegador.")
                 print("Após resolver, pressione ENTER aqui para continuar...")
                 print("!"*60 + "\n")
-                input()
+                if not aguardar_confirmacao_captcha(""):
+                    return False
                 print("   ✓ Continuando...")
                 await asyncio.sleep(2)
             
@@ -126,7 +146,8 @@ async def baixar_pdf_processo(page, numero_processo, browser):
                 print("Por favor, resolva o CAPTCHA manualmente no navegador.")
                 print("Após resolver, pressione ENTER aqui para continuar...")
                 print("!"*60 + "\n")
-                input()
+                if not aguardar_confirmacao_captcha(""):
+                    return False
                 print("   ✓ Continuando...")
                 await asyncio.sleep(2)
         except Exception:
@@ -334,7 +355,7 @@ async def executar_scraping():
     
     # Estatísticas
     print("\n" + "=" * 60)
-    print("ESTATÍSTICAS")
+    print("RELATÓRIO FINAL")
     print("=" * 60)
     print(f"Total de processos: {len(numeros_processos)}")
     print(f"Sucessos: {sucessos} ({sucessos*100//len(numeros_processos) if len(numeros_processos) > 0 else 0}%)")

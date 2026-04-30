@@ -198,11 +198,11 @@ async def executar_scraping():
     
     # Estatísticas
     print("\n" + "=" * 60)
-    print("ESTATÍSTICAS")
+    print("RELATÓRIO FINAL")
     print("=" * 60)
     print(f"Total de processos: {len(numeros_processos)}")
-    print(f"Sucessos: {809} ({809*100//len(numeros_processos)}%)")
-    print(f"Falhas: {593} ({593*100//len(numeros_processos)}%)")
+    print(f"Sucessos: {sucessos} ({sucessos*100//len(numeros_processos) if len(numeros_processos) > 0 else 0}%)")
+    print(f"Falhas: {falhas} ({falhas*100//len(numeros_processos) if len(numeros_processos) > 0 else 0}%)")
     print("=" * 60)
 
 

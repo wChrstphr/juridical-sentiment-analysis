@@ -16,6 +16,24 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium_stealth import stealth
 
 
+NON_INTERACTIVE = os.getenv("SCRAPER_NON_INTERACTIVE", "0") == "1"
+
+
+def aguardar_confirmacao_usuario(mensagem, motivo_captcha=False):
+    """Aguarda interação do usuário quando necessário; em modo não interativo não bloqueia."""
+    if NON_INTERACTIVE:
+        if motivo_captcha:
+            print("CAPTCHA_REQUIRED: execução não interativa detectou desafio de verificação humana")
+        return False
+    try:
+        input(mensagem)
+        return True
+    except EOFError:
+        if motivo_captcha:
+            print("CAPTCHA_REQUIRED: entrada padrão indisponível para resolução manual")
+        return False
+
+
 def ler_numeros_processos(arquivo_csv="tjpb/data/notebook1/numeros_processos.csv"):
     """Lê os números dos processos do arquivo CSV"""
     numeros = []
@@ -77,7 +95,11 @@ def baixar_pdf_processo(driver, numero_processo, primeiro_acesso=False):
             print("IMPORTANTE: Após resolver no primeiro processo,")
             print("os próximos geralmente não pedem verificação.")
             print("!"*60 + "\n")
-            input("Pressione ENTER após resolver o Cloudflare e ver a página de consulta...")
+            if not aguardar_confirmacao_usuario(
+                "Pressione ENTER após resolver o Cloudflare e ver a página de consulta...",
+                motivo_captcha=True,
+            ):
+                return False
             print("   ✓ Continuando...")
             time.sleep(3)
         else:
@@ -100,7 +122,8 @@ def baixar_pdf_processo(driver, numero_processo, primeiro_acesso=False):
             print("Verifique se há CAPTCHA no navegador.")
             print("Após resolver (se houver), pressione ENTER para continuar...")
             print("!"*60 + "\n")
-            input()
+            if not aguardar_confirmacao_usuario("", motivo_captcha=True):
+                return False
             print("   ✓ Tentando continuar...")
             time.sleep(2)
             campo_processo = driver.find_element(By.ID, "fPP:numProcesso-inputNumeroProcessoDecoration:numProcesso-inputNumeroProcesso")
@@ -481,7 +504,7 @@ def executar_scraping():
     
     # Estatísticas
     print("\n" + "=" * 60)
-    print("ESTATÍSTICAS")
+    print("RELATÓRIO FINAL")
     print("=" * 60)
     print(f"Total de processos: {len(numeros_processos)}")
     print(f"Sucessos: {sucessos} ({sucessos*100//len(numeros_processos) if len(numeros_processos) > 0 else 0}%)")
